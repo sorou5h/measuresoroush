@@ -1,0 +1,172 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement Sheet</title>
+    <script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+</head>
+<body>
+    <div class="button-container" style="text-align: center;">
+        <button type="button" id="addWindowButton" onclick="addWindowSection()">Add Window</button>
+        <button type="button" onclick="saveData()" id="saveButton">Save</button>
+        <button type="button" onclick="clearWindowInfo()" id="clearButton">Clear</button>
+        <button type="button" onclick="createCommentSection()" id="commentButton">Add Comment</button>
+    </div>
+    <form>
+        <!-- Customer Information Section -->
+        <h3>Soroush - I0344</h3>
+        <h2>Customer Information</h2>
+        <section>
+
+            <div class="customerInfo" style="width: calc(40% - 4px);">
+                <label for="room">Customer Name:</label>
+                <input type="text" class="room" name="customerName" id="customerName" required>
+            </div>
+
+            <div class="customerInfo" style="width: calc(20% - 4px);">
+                <label for="quantity">Order Number:</label>
+                <input type="text" class="quantity" name="orderNumber" id="orderNumber" required>
+            </div>
+
+            <div class="customerInfo" style="width: calc(20% - 4px);">
+                <label for="mount">Store Number:</label>
+                <input type="text" class="mount" name="storeNumber" id="storeNumber" required>
+            </div>
+
+            <div class="customerInfo" style="width: calc(20% - 4px);">
+                <label for="width">Date:</label>
+                <input type="date" class="width" name="date" id="date" required>
+            </div>
+        </section>
+       
+
+        <!-- Window Information Section (Dynamic) -->
+        <h2> </h2>
+        <section>
+
+            <div class="windowInfoSection window-info" style="width: calc(100% - 5px);" >
+                <!-- <label for="room">ROOM:</label> -->
+                <input type="text" class="room" name="room" id="room1" style="background-color: #FFFCD3; font-weight: bold; " required>
+            </div>
+            <div class="windowInfoSection" style="width: calc(15% - 60px);">
+                <label for="type">Type:</label>
+                <select class="type" name="type" id="type1" required>
+                    <option value="mt6"> </option>
+                    <option value="Roller">Roller Shade</option>
+                    <option value="Cascade">Cascade</option>
+                    <option value="Horizantal1">1" Aluminium</option>
+                    <option value="Horizantal2">2" Horizantal</option>
+                    <option value="Vertical">Vertical</option>
+                    <option value="Romen">Romen</option>
+                    <option value="ww">Woven Wood</option>
+                </select>
+            </div>
+    
+
+            <div class="windowInfoSection" style="width: calc(3% - 1px);">
+                <label for="quantity">QTY:</label>
+                <input type="text" class="quantity" name="quantity" id="quantity1" required placeholder="1">
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(10% - 1px);">
+                <label for="mount">I/O:</label>
+                <select class="mount" name="mount" id="mount1" required>
+                    <option value="mt5"> </option>
+                    <option value="inside">Inside</option>
+                    <option value="outside">Outside</option>
+                </select>
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(13% - 6px);">
+                <label for="width">W Width:</label>
+                <input type="text" class="width" name="width" id="width1" required oninput="convertToFraction(this)" placeholder="0">
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(13% - 60px);">
+                <label for="height">W Height:</label>
+                <input type="text" class="height" name="height" id="height1" required oninput="convertToFraction(this)" placeholder="0">
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(5% - 1px);" >
+                <label for="depth">Depth:</label>
+                <input type="text" class="depth" name="depth" id="depth1" required placeholder="0">
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(13% - 60px);">
+                <label for="bwidth">B Width:</label>
+                <input type="text" class="bwidth" name="bwidth" id="width2" required oninput="convertToFraction(this)" placeholder="0">
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(13% - 60px);">
+                <label for="bheight">B Height:</label>
+                <input type="text" class="bheight" name="bheight" id="height2" required oninput="convertToFraction(this)" placeholder="0">
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(3% - 1px);">
+                <label for="wand">Wand:</label>
+                <select class="wand" name="wand" id="wand1" required>
+                    <option value="mt3"> </option>
+                    <option value="right">R</option>
+                    <option value="left">L</option>
+                </select>
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(3% - 1px);">
+                <label for="motor">Motor:</label>
+                <select class="motor" name="motor" id="motor1" required>
+                    <option value="mt2"> </option>
+                    <option value="right">R</option>
+                    <option value="left">L</option>
+                </select>
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(3% - 1px);">
+                <label for="vertical">Vertical:</label>
+                <select class="vertical" name="vertical" id="vertical1" required>
+                    <option value="mt"> </option>
+                    <option value="right">R</option>
+                    <option value="center">C</option>
+                    <option value="left">L</option>
+                </select>
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(3% - 1px);">
+                <label for="wall">Wall:</label>
+                <select class="wall" name="wall" id="wall1" required>
+                    <option value="DW"> </option>
+                    <option value="Concrete">C</option>
+                    <option value="Metal">M</option>
+                </select>
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(3% - 1px);">
+                <label for="td">T D:</label>
+                <select class="td" name="td" id="td1" required>
+                    <option value="mt4"> </option>
+                    <option value="yes">Y</option>
+                </select>
+            </div>
+    
+            <div class="windowInfoSection" style="width: calc(15% - 60px);">
+                <label for="comm">Comment:</label>
+                <input type="text" class="comm" name="comm" id="comm1" required>
+            </div>
+        </section>
+    </form>
+<script >
+    
+     // Get the current date in the user's local timezone
+    var today = new Date().toLocaleDateString('en-CA'); // You can change 'en-CA' to your preferred locale
+
+    // Set the value of the date input field to today's date
+    document.getElementById('date').value = today;
+</script>
+</body>
+</html>
+
+
