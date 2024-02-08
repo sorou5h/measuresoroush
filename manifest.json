@@ -13,9 +13,9 @@
     }
   ],
   "cache": [
-    "js/html2pdf.bundle.min.js",
-    "js/app.js",
-    "css/styles.css",
+    "html2pdf.bundle.min.js",
+    "app.js",
+    "styles.css",
     "offline.html"
   ],
   "fallback": ["/offline.html"],
