@@ -1,4 +1,39 @@
-let windowSectionCounter = 2; // Initialize the counter
+let windowSectionCounter = 1; // Initialize the counter
+
+
+
+var today = new Date().toLocaleDateString('en-CA');
+document.getElementById('date').value = today;
+
+
+            // Function to update the "Concrete" count in the customer section
+            function updateWallCount(checkbox) {
+                // Get the Concrete input field in the customer section
+                const wallInput = document.getElementById('wall');
+
+                // Check if the checkbox is checked or unchecked
+                if (checkbox.checked) {
+                    // If checked, increment the count in the "Concrete" field
+                    wallInput.value = parseInt(wallInput.value || 0) + 1;
+                } else {
+                    // If unchecked, decrement the count in the "Concrete" field (if greater than 0)
+                    wallInput.value = Math.max(parseInt(wallInput.value || 0) - 1, 0);
+                }
+            }
+    
+            function updateTDCount(checkbox) {
+                // Get the TD input field in the customer section
+                const tdInput = document.getElementById('td');
+
+                // Check if the checkbox is checked or unchecked
+                if (checkbox.checked) {
+                    // If checked, increment the count in the "Take Down" field
+                    tdInput.value = parseInt(tdInput.value || 0) + 1;
+                } else {
+                    // If unchecked, decrement the count in the "Take Down" field (if greater than 0)
+                    tdInput.value = Math.max(parseInt(tdInput.value || 0) - 1, 0);
+                }
+            }
 
             function convertToFraction(input) {
             // Get the input value
@@ -50,23 +85,37 @@ let windowSectionCounter = 2; // Initialize the counter
 
             function addWindowSection() {
                 // Clone the entire window information section and append it to the form
-                const windowSections = document.querySelectorAll('.windowInfoSection');
+                const windowSections = document.querySelectorAll('.window-container');
                 const lastWindowSection = windowSections[windowSections.length - 1];
-    
+
                 if (lastWindowSection) {
-                    const newWindowSection = lastWindowSection.parentNode.cloneNode(true);
-                    // Update the IDs and names of the new window section elements to make them unique
-                    newWindowSection.querySelectorAll('[id]').forEach(element => {
-                        const oldId = element.id;
-                        const newId = oldId.replace(/\d+/, match => +match + windowSectionCounter);
-                        element.id = newId;
-                        element.setAttribute('name', newId); // Also update the 'name' attribute
-                        element.value = ''; // Clear the value if needed
-                    });
-                    // Append the new window section to the form
-                    document.querySelector('form').appendChild(newWindowSection);
+                    const newWindowSection = lastWindowSection.cloneNode(true);
+
                     // Increment the counter for the next window section
                     windowSectionCounter++;
+
+                    // Update the section number in the cloned window section
+                    const sectionNumberElement = newWindowSection.querySelector('.section-number');
+                    if (sectionNumberElement) {
+                        sectionNumberElement.textContent = windowSectionCounter;
+                    }
+
+                    // Reset input field values in the cloned section
+                    newWindowSection.querySelectorAll('input, select').forEach(element => {
+                        element.value = '';
+
+                        // Reset checkbox states
+                        if (element.type === 'checkbox') {
+                            element.checked = false;
+                        }
+                    });
+
+                    // Append the new window section to the form
+                    document.querySelector('form').appendChild(newWindowSection);
+
+                    // Show the remove button when adding sections
+                    const removeWindowButton = document.getElementById('removeWindowButton');
+                    removeWindowButton.style.display = 'inline-block';
                 } else {
                     console.error('No existing window section found.');
                 }
@@ -81,12 +130,15 @@ let windowSectionCounter = 2; // Initialize the counter
                     // intallerID: document.getElementById('intallerID').value,
                     // intallerName: document.getElementById('intallerName').value,
                 };
-
+                const roomElement = document.getElementById(`room${windowSectionCounter}`);
+                if (roomElement) {
+                    roomElement.value = roomElement.value.toUpperCase();
+                }
                 const windowDataList = [];
                 const windowSections = document.querySelectorAll('windowInfoSection');
                 windowSections.forEach((windowSection, index) => {
                     // Add a check for null before accessing properties
-                    const roomElement = windowSection.querySelector('room');
+                    const roomElement = windowSection.querySelector('input[name="room"]');
                     const quantityElement = windowSection.querySelector('quantity');
                     const mountElement = windowSection.querySelector('mount');
                     const widthElement = windowSection.querySelector('width');
@@ -124,76 +176,106 @@ let windowSectionCounter = 2; // Initialize the counter
             }    
 
             function generatePDF(data) {
-    const addButton = document.getElementById('addWindowButton');
-    const saveButton = document.getElementById('saveButton');
-    const clearButton = document.getElementById('clearButton');
-    const commentButton = document.getElementById('commentButton');
-    addButton.style.display = 'none';
-    saveButton.style.display = 'none';
-    clearButton.style.display = 'none';
-    commentButton.style.display = 'none';
+                const addButton = document.getElementById('addWindowButton');
+                const saveButton = document.getElementById('saveButton');
+                const clearButton = document.getElementById('clearButton');
+                const commentButton = document.getElementById('commentButton');
+                const removeWindowButton = document.getElementById('removeWindowButton');
+                const removeCommentButton = document.getElementById('removeCommentButton');
 
-    // Extract customer name and order number from the data
-    const customerName = data.customerData.customerName;
-    const orderNumber = data.customerData.orderNumber;
+                addButton.style.display = 'none';
+                saveButton.style.display = 'none';
+                clearButton.style.display = 'none';
+                commentButton.style.display = 'none';
+                removeWindowButton.style.display = 'none';
+                removeCommentButton.style.display = 'none';
 
-    // Convert spaces to underscores and remove any special characters
-    const sanitizedCustomerName = customerName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-    const sanitizedOrderNumber = orderNumber.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+                // Extract customer name and order number from the data
+                const customerName = data.customerData.customerName;
+                const orderNumber = data.customerData.orderNumber;
 
-    // Generate PDF with customer name and order number in the filename
-   html2pdf().from(document.body)
-        .set({
-            filename: `${sanitizedCustomerName}_${sanitizedOrderNumber}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            //html2canvas: { scale: 1 }, // Reduced scale
-            jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' },
-        })
-        .toPdf()
-        .get('pdf')
-        .then(function (pdf) {
-            const totalPages = pdf.internal.getNumberOfPages();
-            pdf.setFontSize(10); // Set the font size for the page numbers
-            pdf.setTextColor(150); // Set the text color for the page numbers
+                // Convert spaces to underscores and remove any special characters
+                const sanitizedCustomerName = customerName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+                const sanitizedOrderNumber = orderNumber.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
 
-            for (let i = 1; i <= totalPages; i++) {
-                pdf.setPage(i);
-                pdf.text('Page ' + i + ' of ' + totalPages, pdf.internal.pageSize.getWidth() - 30, pdf.internal.pageSize.getHeight() - 10);
-            }
-        })
-        .save()
-        .then(() => {
-            addButton.style.display = 'inline-block';
-            saveButton.style.display = 'inline-block';
-            clearButton.style.display = 'inline-block';
-            commentButton.style.display = 'inline-block';
-        })
-        .catch((error) => {
-            console.error('Error generating PDF:', error);
-            addButton.style.display = 'inline-block';
-            saveButton.style.display = 'inline-block';
-            clearButton.style.display = 'inline-block';
-            commentButton.style.display = 'inline-block';
-        });
-}
-
-
-
-            function clearWindowInfo() {
-            // Clear window information fields
-                const windowSections = document.querySelectorAll('.windowInfoSection');
-                windowSections.forEach((windowSection, index) => {
-                    const inputFields = windowSection.querySelectorAll('input, select');
-                    inputFields.forEach((field) => {
-                        field.value = '';
-                    });
+                // Generate PDF with customer name and order number in the filename
+                html2pdf().from(document.body)
+                .set({
+                    filename: `${sanitizedCustomerName}_${sanitizedOrderNumber}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    // html2canvas: { scale: 1.5 }, // Reduced scale
+                    jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' },
+                })
+                .toPdf()
+                .get('pdf')
+                .then(function (pdf) {
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    pdf.setFontSize(10); // Set the font size for the page numbers
+                    pdf.setTextColor(150); // Set the text color for the page numbers
+                    for (let i = 1; i <= totalPages; i++) {
+                        pdf.setPage(i);
+                        pdf.text('Page ' + i + ' of ' + totalPages, pdf.internal.pageSize.getWidth() - 30, pdf.internal.pageSize.getHeight() - 5);
+                    }
+                })
+                .save()
+                .then(() => {
+                    addButton.style.display = 'inline-block';
+                    saveButton.style.display = 'inline-block';
+                    clearButton.style.display = 'inline-block';
+                    commentButton.style.display = 'inline-block';
+                    removeWindowButton.style.display = 'inline-block';
+                    removeCommentButton.style.display = 'inline-block';
+                })
+                .catch((error) => {
+                    console.error('Error generating PDF:', error);
+                    addButton.style.display = 'inline-block';
+                    saveButton.style.display = 'inline-block';
+                    clearButton.style.display = 'inline-block';
+                    commentButton.style.display = 'inline-block';
+                    removeWindowButton.style.display = 'inline-block';
+                    removeCommentButton.style.display = 'inline-block';
                 });
             }
 
+            function clearWindowInfo() {
+                // Display a confirmation prompt
+                const confirmed = confirm("Are you sure you want to clear?");
+                if (confirmed) {
+                    // Clear customer information fields
+                    // document.getElementById('customerName').value = '';
+                    // document.getElementById('orderNumber').value = '';
+                    // document.getElementById('storeNumber').value = '';
+                    // document.getElementById('date').value = '';
+                    document.getElementById('wall').value = ''; // Clear Wall
+                    document.getElementById('td').value = '';   // Clear TD
+                    document.getElementById('hallaway').value = ''; // Clear Hallaway
+                    document.getElementById('wall1').checked = false; // Clear Concrete checkbox
+                    document.getElementById('td1').checked = false;   // Clear T.D. checkbox
+                    // document.getElementById('comm1').value = '';
+
+                    // Clear window information fields in all sections
+                    const windowSections = document.querySelectorAll('.window-container');
+                    windowSections.forEach((windowSection) => {
+                        const inputFields = windowSection.querySelectorAll('input, select');
+                        inputFields.forEach((field) => {
+                            field.value = '';
+                        });
+                    });
+
+                    // Clear comments if the comment section exists
+                    const commentTextarea = document.getElementById('comments');
+                    if (commentTextarea) {
+                        commentTextarea.value = '';
+                    }
+                } else {
+                    // User clicked 'Cancel,' do nothing
+                }
+            }
+            
             function createCommentSection() {
                 // Check if the comment section already exists
                 const existingCommentSection = document.getElementById('commentSection');
-    
+
                 if (!existingCommentSection) {
                     // Create a new comment section
                     const commentSection = document.createElement('section');
@@ -216,6 +298,10 @@ let windowSectionCounter = 2; // Initialize the counter
                     // Append the comment section to the form
                     const form = document.querySelector('form');
                     form.appendChild(commentSection);
+
+                    // Show the remove button when creating the comment section
+                    const removeCommentButton = document.getElementById('removeCommentButton');
+                    removeCommentButton.style.display = 'inline-block';
                 } else {
                     console.log('Comment section already exists.');
                 }
@@ -227,7 +313,60 @@ let windowSectionCounter = 2; // Initialize the counter
                 document.body.appendChild(pageBreak);
             }
             
-    		var today = new Date().toLocaleDateString('en-CA'); // You can change 'en-CA' to your preferred locale
-    		// Set the value of the date input field to today's date
-    		document.getElementById('date').value = today;
-            
+            function removeWindowSection() {
+                // Select all window sections
+                const windowSections = document.querySelectorAll('.window-container');
+    
+                // Check if there's more than one section left
+                if (windowSections.length > 1) {
+                    // Display a confirmation prompt
+                    const confirmation = confirm('Are you sure you want to remove the last window section?');
+                    if (confirmation) {
+                        // Remove the last window section (from the bottom)
+                        const lastWindowSection = windowSections[windowSections.length - 1];
+
+                        // Decrement the "Concrete" count if the checkbox is checked
+                        const wallCheckbox = lastWindowSection.querySelector('.wall');
+                        if (wallCheckbox && wallCheckbox.checked) {
+                            const wallInput = document.getElementById('wall');
+                            wallInput.value = Math.max(parseInt(wallInput.value || 0) - 1, 0);
+                        }
+
+                        // Decrement the "T.D." count if the checkbox is checked
+                        const tdCheckbox = lastWindowSection.querySelector('.td');
+                        if (tdCheckbox && tdCheckbox.checked) {
+                            const tdInput = document.getElementById('td');
+                            tdInput.value = Math.max(parseInt(tdInput.value || 0) - 1, 0);
+                        }
+
+                        // Remove the last window section
+                        lastWindowSection.remove();
+                    }
+                } else {
+                    console.log('Cannot remove the last section.');
+                }
+            }
+
+            function removeCommentSection() {
+                // Select the comment section
+                const commentSection = document.getElementById('commentSection');
+                if (commentSection) {
+                    // Display a confirmation prompt
+                    const confirmation = confirm('Are you sure you want to remove the comment section?');
+                    if (confirmation) {
+                        // Remove the comment section
+                        commentSection.remove();
+                    }
+                } else {
+                    console.log('Comment section does not exist.');
+                }
+            }
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    }, function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+                });
+            }
