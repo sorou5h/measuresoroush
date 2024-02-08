@@ -1,11 +1,5 @@
 let windowSectionCounter = 1; // Initialize the counter
 
-
-
-var today = new Date().toLocaleDateString('en-CA');
-document.getElementById('date').value = today;
-
-
             // Function to update the "Concrete" count in the customer section
             function updateWallCount(checkbox) {
                 // Get the Concrete input field in the customer section
@@ -249,28 +243,37 @@ document.getElementById('date').value = today;
                     document.getElementById('wall').value = ''; // Clear Wall
                     document.getElementById('td').value = '';   // Clear TD
                     document.getElementById('hallaway').value = ''; // Clear Hallaway
-                    document.getElementById('wall1').checked = false; // Clear Concrete checkbox
-                    document.getElementById('td1').checked = false;   // Clear T.D. checkbox
+                   
                     // document.getElementById('comm1').value = '';
 
                     // Clear window information fields in all sections
                     const windowSections = document.querySelectorAll('.window-container');
-                    windowSections.forEach((windowSection) => {
-                        const inputFields = windowSection.querySelectorAll('input, select');
-                        inputFields.forEach((field) => {
-                            field.value = '';
-                        });
+                    windowSections.forEach((windowSection, index) => {
+                        const wallCheckbox = windowSection.querySelector('.wall');
+                        const tdCheckbox = windowSection.querySelector('.td');
+                        if (wallCheckbox) {
+                            wallCheckbox.checked = false;
+                        }
+                        if (tdCheckbox) {
+                            tdCheckbox.checked = false;
+                        }
                     });
+            
+                    // Clear window information fields in all sections
+        const inputFields = document.querySelectorAll('.window-container input, .window-container select');
+        inputFields.forEach((field) => {
+            field.value = '';
+        });
 
-                    // Clear comments if the comment section exists
-                    const commentTextarea = document.getElementById('comments');
-                    if (commentTextarea) {
-                        commentTextarea.value = '';
-                    }
-                } else {
-                    // User clicked 'Cancel,' do nothing
-                }
-            }
+        // Clear comments if the comment section exists
+        const commentTextarea = document.getElementById('comments');
+        if (commentTextarea) {
+            commentTextarea.value = '';
+        }
+    } else {
+        // User clicked 'Cancel,' do nothing
+    }
+}
             
             function createCommentSection() {
                 // Check if the comment section already exists
@@ -347,26 +350,43 @@ document.getElementById('date').value = today;
                 }
             }
 
-            function removeCommentSection() {
-                // Select the comment section
-                const commentSection = document.getElementById('commentSection');
-                if (commentSection) {
+            function removeWindowSection() {
+                // Select all window sections
+                const windowSections = document.querySelectorAll('.window-container');
+            
+                // Check if there's more than one section left
+                if (windowSections.length > 1) {
                     // Display a confirmation prompt
-                    const confirmation = confirm('Are you sure you want to remove the comment section?');
+                    const confirmation = confirm('Are you sure you want to remove the last window section?');
                     if (confirmation) {
-                        // Remove the comment section
-                        commentSection.remove();
+                        // Remove the last window section (from the bottom)
+                        const lastWindowSection = windowSections[windowSections.length - 1];
+            
+                        // Decrement the "Concrete" count if the checkbox is checked
+                        const wallCheckbox = lastWindowSection.querySelector('.wall');
+                        if (wallCheckbox && wallCheckbox.checked) {
+                            const wallInput = document.getElementById('wall');
+                            wallInput.value = Math.max(parseInt(wallInput.value || 0) - 1, 0);
+                        }
+            
+                        // Decrement the "T.D." count if the checkbox is checked
+                        const tdCheckbox = lastWindowSection.querySelector('.td');
+                        if (tdCheckbox && tdCheckbox.checked) {
+                            const tdInput = document.getElementById('td');
+                            tdInput.value = Math.max(parseInt(tdInput.value || 0) - 1, 0);
+                        }
+            
+                        // Remove the last window section
+                        lastWindowSection.remove();
+            
+                        // Decrement the counter
+                        windowSectionCounter--;
                     }
                 } else {
-                    console.log('Comment section does not exist.');
+                    console.log('Cannot remove the last section.');
                 }
             }
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                    navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    }, function(err) {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
-                });
-            }
+            
+
+    		var today = new Date().toLocaleDateString('en-CA');
+    		document.getElementById('date').value = today;
